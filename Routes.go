@@ -21,7 +21,5 @@ func RegisterRoutes(r *gin.Engine) {
 			c.JSON(http.StatusOK, gin.H{"message": "pong"})
 		})
 
-		// Contoh route lainnya
-		// api.POST("/user", controllers.CreateUser)
 	}
 }
