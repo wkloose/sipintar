@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 	"github.com/wkloose/tempproject.git/initializers"
-	"github.com/wkloose/tempproject.git/middleware"
 	"github.com/gin-gonic/gin"
+	"github.com/wkloose/tempproject.git/Routes"
 )
 
 func init() {
@@ -16,9 +16,7 @@ func init() {
 func main() {
 	router := gin.Default()
 
-	router.Use(middleware.RequireAuth)
-	RegisterRoutes(router)
+	Routes.Routes(router)
 
-	
 	router.Run(":" + os.Getenv("PORT"))
 }

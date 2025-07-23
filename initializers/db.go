@@ -22,8 +22,26 @@ func ConnectToDB() {
 }
 
 func SyncDatabase() {
-	err := DB.AutoMigrate(&models.User{})
-	if err != nil {
-		fmt.Println("failed to migrate database")
+	modelsToMigrate := []interface{}{
+		&models.User{},
+		&models.AnswerOption{},
+		&models.HeartReward{},
+		&models.LearningProgress{},
+		&models.Material{},
+		&models.MaterialContent{},
+		&models.PasswordResetToken{},
+		&models.Question{},
+		&models.ScoreSession{},
+		&models.Streak{},
+		&models.UserProfile{},
+	}
+
+	for _, model := range modelsToMigrate {
+		err := DB.AutoMigrate(model)
+		if err != nil {
+			fmt.Printf("Gagal migrate model: %T, error: %v\n", model, err)
+		} else {
+			fmt.Printf("Berhasil migrate model: %T (tabel mungkin sudah ada atau baru dibuat)\n", model)
+		}
 	}
 }
