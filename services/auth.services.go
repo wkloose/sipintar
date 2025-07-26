@@ -45,6 +45,13 @@ func RegisterUser(username, email, password string) error {
     if result.Error != nil {
         return result.Error
     }
+    profile := models.UserProfile{
+        ID:       uuid.New(),
+        UserID:   user.ID,
+        Name:     "",         // bisa default
+        PhotoURL: "",         // bisa dikosongkan dulu
+    }
+     _ = initializers.DB.Create(&profile)
 
     return nil
 }

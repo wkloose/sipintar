@@ -43,5 +43,10 @@ func Routes(r *gin.Engine) {
 	{
 		streak.GET("/", controllers.GetStreakHandler)
 	}
+	profile := protected.Group("/profile")
+	{
+		profile.GET("/", controllers.GetProfile)
+		profile.PUT("/", controllers.UpdateProfile)
+	}
 }
 }
