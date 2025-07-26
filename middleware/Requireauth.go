@@ -34,7 +34,19 @@ func RequireAuth(c *gin.Context) {
 	}
 
 	var user models.User
-	initializers.DB.First(&user, claims["sub"])
+	sub, ok := claims["sub"].(string)
+	if !ok {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	userID, err := uuid.Parse(sub)
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	initializers.DB.First(&user, "id = ?", userID)
 
 	if user.ID == uuid.Nil {
 		c.AbortWithStatus(http.StatusUnauthorized)
@@ -42,5 +54,6 @@ func RequireAuth(c *gin.Context) {
 	}
 
 	c.Set("user", user)
+	c.Set("userID", user.ID)
 	c.Next()
 }
