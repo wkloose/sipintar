@@ -24,7 +24,11 @@ func Routes(r *gin.Engine) {
 		heart.GET("/status", controllers.GetHeartStatus)
 		heart.POST("/claim", controllers.ClaimHeart)
 	}
+	materials := protected.Group("/materials")
+	{
+		materials.GET("/", controllers.GetAllMaterials)
+		materials.GET("/:id", controllers.GetMaterialDetail)
 	}
 
 }
-
+}
