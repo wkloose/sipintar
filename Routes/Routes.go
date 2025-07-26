@@ -29,6 +29,10 @@ func Routes(r *gin.Engine) {
 		materials.GET("/", controllers.GetAllMaterials)
 		materials.GET("/:id", controllers.GetMaterialDetail)
 	}
-
+	quizzes := protected.Group("/quiz")
+	{
+		quizzes.GET("/:material_id", controllers.GetQuizHandler)
+		quizzes.POST("/:material_id/submit", controllers.SubmitQuizHandler)
+	}
 }
 }
