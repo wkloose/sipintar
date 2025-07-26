@@ -39,5 +39,9 @@ func Routes(r *gin.Engine) {
 		roadmap.GET("/", controllers.GetRoadmap)
 		roadmap.GET("/progress", controllers.GetTotalProgressHandler)
 	}
+	streak := protected.Group("/streak")
+	{
+		streak.GET("/", controllers.GetStreakHandler)
+	}
 }
 }
