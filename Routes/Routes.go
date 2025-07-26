@@ -34,5 +34,10 @@ func Routes(r *gin.Engine) {
 		quizzes.GET("/:material_id", controllers.GetQuizHandler)
 		quizzes.POST("/:material_id/submit", controllers.SubmitQuizHandler)
 	}
+	roadmap := protected.Group("/roadmap")
+	{
+		roadmap.GET("/", controllers.GetRoadmap)
+		roadmap.GET("/progress", controllers.GetTotalProgressHandler)
+	}
 }
 }
