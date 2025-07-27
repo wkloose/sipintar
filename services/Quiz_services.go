@@ -23,13 +23,11 @@ func GetQuizQuestions(materialID uuid.UUID) ([]models.Question, error) {
         return nil, err
     }
 
-    // Acak soalnya
     rand.Seed(time.Now().UnixNano())
     rand.Shuffle(len(allQuestions), func(i, j int) {
         allQuestions[i], allQuestions[j] = allQuestions[j], allQuestions[i]
     })
 
-    // Ambil maksimal 10 soal
     limit := 10
     if len(allQuestions) < 10 {
         limit = len(allQuestions)
@@ -63,14 +61,13 @@ func SubmitQuiz(userID, materialID uuid.UUID, answers []AnswerInput) (int, int, 
         }
     }
 
-    // Simpan ke ScoreSession
     session := models.ScoreSession{
         ID:         uuid.New(),
         UserID:     userID,
         MaterialID: materialID,
         Correct:    correct,
         Wrong:      wrong,
-        Duration:   0, // opsional isi jika ada timer
+        Duration:   0, 
         CreatedAt:  time.Now(),
     }
 
@@ -78,7 +75,6 @@ func SubmitQuiz(userID, materialID uuid.UUID, answers []AnswerInput) (int, int, 
         return 0, 0, err
     }
 
-    // Update LearningProgress
     var progress models.LearningProgress
     err := initializers.DB.
         Where("user_id = ? AND material_id = ?", userID, materialID).
@@ -105,7 +101,6 @@ func SubmitQuiz(userID, materialID uuid.UUID, answers []AnswerInput) (int, int, 
         _ = initializers.DB.Save(&progress)
     }
 
-    // Update streak
     var streak models.Streak
 	err = initializers.DB.Where("user_id = ?", userID).First(&streak).Error
 	if err != nil {
@@ -130,7 +125,6 @@ func SubmitQuiz(userID, materialID uuid.UUID, answers []AnswerInput) (int, int, 
 		_ = initializers.DB.Save(&streak)
 	}
 
-    // Kurangi nyawa
     _ = ReduceHeart(userID)
 
     return correct, wrong, nil
