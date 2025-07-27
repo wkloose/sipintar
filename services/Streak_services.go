@@ -16,7 +16,6 @@ func UpdateStreak(userID uuid.UUID) error {
 
 	err := initializers.DB.Where("user_id = ?", userID).First(&streak).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		// Belum ada streak → buat baru
 		streak = models.Streak{
 			ID:            uuid.New(),
 			UserID:        userID,
@@ -32,13 +31,10 @@ func UpdateStreak(userID uuid.UUID) error {
 
 	switch {
 	case today.Equal(last):
-		// Sudah update hari ini
 		return nil
 	case today.Sub(last) == 24*time.Hour:
-		// Hari berikutnya → lanjutkan streak
 		streak.CurrentStreak += 1
 	default:
-		// Lewat lebih dari 1 hari → reset
 		streak.CurrentStreak = 1
 	}
 
