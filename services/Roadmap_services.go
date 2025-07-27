@@ -40,7 +40,7 @@ func GetRoadmapForUser(userID uuid.UUID) ([]RoadmapItem, error) {
             Title:       m.Title,
             Description: m.Description,
             Percent:     0,
-            Unlocked:    i == 0 || found, // materi pertama pasti terbuka
+            Unlocked:    i == 0 || found, 
             Status:      "locked",
         }
 
@@ -77,7 +77,7 @@ func GetTotalProgress(userID uuid.UUID) (float64, error) {
 
     total := 0.0
     for _, m := range materials {
-        total += progressMap[m.ID] // akan 0 kalau belum pernah mengerjakan
+        total += progressMap[m.ID] 
     }
 
     if len(materials) == 0 {
