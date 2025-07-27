@@ -48,8 +48,8 @@ func RegisterUser(username, email, password string) error {
     profile := models.UserProfile{
         ID:       uuid.New(),
         UserID:   user.ID,
-        Name:     "",         // bisa default
-        PhotoURL: "",         // bisa dikosongkan dulu
+        Name:     username,         
+        PhotoURL: "",         
     }
      _ = initializers.DB.Create(&profile)
 
