@@ -16,9 +16,9 @@ type ProfileResponse struct {
 	JoinedAt   time.Time `json:"joined_at"`
 
 	Stats struct {
-		LamaBelajar      int `json:"lama_belajar"`       // total durasi dari ScoreSession (detik)
-		SoalDikerjakan   int `json:"soal_dikerjakan"`    // dari LearningProgress.TotalQuestions
-		Penyelesaian     int `json:"penyelesaian"`       // total sesi dari ScoreSession
+		LamaBelajar      int `json:"lama_belajar"`       
+		SoalDikerjakan   int `json:"soal_dikerjakan"`    
+		Penyelesaian     int `json:"penyelesaian"`      
 		Streak           int `json:"streak"`
 	} `json:"stats"`
 }
@@ -72,7 +72,6 @@ type UpdateProfileInput struct {
 func UpdateUserProfile(userID uuid.UUID, input UpdateProfileInput) error {
 	var profile models.UserProfile
 
-	// Pastikan hanya update milik sendiri
 	if err := initializers.DB.Where("user_id = ?", userID).First(&profile).Error; err != nil {
 		return err
 	}
