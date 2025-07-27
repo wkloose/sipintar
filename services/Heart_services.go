@@ -27,7 +27,6 @@ func GetUserHearts(userID uuid.UUID) (int, int, error) {
 		return 0, 0, err
 	}
 
-	// Hitung jumlah nyawa yang harusnya diregenerasi
 	now := time.Now()
 	elapsed := now.Sub(heart.LastRegenTime)
 	newHearts := int(elapsed.Minutes()) / 5
@@ -42,7 +41,6 @@ func GetUserHearts(userID uuid.UUID) (int, int, error) {
 		initializers.DB.Save(&heart)
 	}
 
-	// Hitung waktu ke nyawa berikutnya
 	timeSince := time.Since(heart.LastRegenTime)
 	elapsedSeconds := int(timeSince.Seconds())
 	nextIn := 300 - (elapsedSeconds % 300)
@@ -58,11 +56,10 @@ func ClaimHeartAfterMaterial(userID uuid.UUID) error {
 	var heart models.HeartReward
 	err := initializers.DB.First(&heart, "user_id = ?", userID).Error
 if errors.Is(err, gorm.ErrRecordNotFound) {
-    // Inisialisasi heart baru
     heart = models.HeartReward{
         ID:            uuid.New(),
         UserID:        userID,
-        Hearts:        0, // bisa juga 5, sesuai strategimu
+        Hearts:        0,
         LastRegenTime: time.Now(),
     }
     if err := initializers.DB.Create(&heart).Error; err != nil {
