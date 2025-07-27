@@ -34,11 +34,10 @@ func RequestPasswordReset(email string) (string, error) {
 		return "", err 
 	}
 
-	// Ambil expiration dari env
 	expMinStr := os.Getenv("RESET_PASSWORD_EXPIRATION_MINUTES")
 	expMin, err := strconv.Atoi(expMinStr)
 	if err != nil || expMin <= 0 {
-		expMin = 15 // fallback default
+		expMin = 15 
 	}
 
 	token := generateToken(32)
