@@ -48,5 +48,10 @@ func Routes(r *gin.Engine) {
 		profile.GET("/", controllers.GetProfile)
 		profile.PUT("/", controllers.UpdateProfile)
 	}
+	protected := r.Group("/progress")
+	protected.Use(middleware.RequireAuth)
+	{
+		protected.GET("/statistik", controllers.GetProgressStatHandler)
+	}
 }
 }
