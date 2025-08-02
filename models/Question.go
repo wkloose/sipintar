@@ -10,5 +10,6 @@ type Question struct {
     Type        string          // "multiple_choice" / "essay"
     Question    string
     Explanation string
+    ImageURL    *string  
     Options     []AnswerOption  `gorm:"foreignKey:QuestionID"`
 }
