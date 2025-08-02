@@ -10,6 +10,5 @@ type MaterialContent struct {
     Type       string     // "text", "video", "image"
     Text       *string    // hanya diisi jika Type = "text"
     Link       *string    // untuk video/image berbasis URL
-    ImageBlob  *[]byte    // untuk menyimpan blob gambar jika perlu
     Order      int        // urutan konten
 }
