@@ -9,9 +9,10 @@ type UserProfile struct {
     UserID         uuid.UUID `gorm:"type:uuid;uniqueIndex"` // relasi ke User
     Name           string
     Description    string
-    PhotoURL       string
+    PhotoBlob      []byte // Ganti dari PhotoURL
     TotalQuestions int
     TotalCorrect   int
-    StreakID       uuid.UUID `gorm:"type:uuid"` // relasi ke Streak
-    HeartRewardID  uuid.UUID `gorm:"type:uuid"` // relasi ke HeartReward
+    StreakID       uuid.UUID `gorm:"type:uuid"`
+    HeartRewardID  uuid.UUID `gorm:"type:uuid"`
 }
+

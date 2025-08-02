@@ -6,79 +6,83 @@ import (
 	"github.com/wkloose/tempproject.git/initializers"
 	"github.com/wkloose/tempproject.git/models"
 	"time"
+	"encoding/base64"
 )
 
 type ProfileResponse struct {
-	Username   string `json:"username"`
-	Name       string `json:"name"`
-	Description string `json:"description"`
-	PhotoURL   string `json:"photo_url"`
-	JoinedAt   time.Time `json:"joined_at"`
+    Username    string    `json:"username"`
+    Name        string    `json:"name"`
+    Description string    `json:"description"`
+    PhotoBase64 string    `json:"photo_base64"`
+    JoinedAt    time.Time `json:"joined_at"`
 
-	Stats struct {
-		LamaBelajar      int `json:"lama_belajar"`       
-		SoalDikerjakan   int `json:"soal_dikerjakan"`    
-		Penyelesaian     int `json:"penyelesaian"`      
-		Streak           int `json:"streak"`
-	} `json:"stats"`
+    Stats struct {
+        LamaBelajar    int `json:"lama_belajar"`
+        SoalDikerjakan int `json:"soal_dikerjakan"`
+        Penyelesaian   int `json:"penyelesaian"`
+        Streak         int `json:"streak"`
+    } `json:"stats"`
 }
 
 func GetUserProfile(userID uuid.UUID) (*ProfileResponse, error) {
-	var user models.User
-	if err := initializers.DB.Preload("Profile").First(&user, "id = ?", userID).Error; err != nil {
-		return nil, err
-	}
+    var user models.User
+    if err := initializers.DB.Preload("Profile").First(&user, "id = ?", userID).Error; err != nil {
+        return nil, err
+    }
 
-	var streak models.Streak
-	_ = initializers.DB.First(&streak, "user_id = ?", userID).Error
+    var streak models.Streak
+    _ = initializers.DB.First(&streak, "user_id = ?", userID).Error
 
-	var scoreSessions []models.ScoreSession
-	_ = initializers.DB.Where("user_id = ?", userID).Find(&scoreSessions).Error
+    var scoreSessions []models.ScoreSession
+    _ = initializers.DB.Where("user_id = ?", userID).Find(&scoreSessions).Error
 
-	var progress []models.LearningProgress
-	_ = initializers.DB.Where("user_id = ?", userID).Find(&progress).Error
+    var progress []models.LearningProgress
+    _ = initializers.DB.Where("user_id = ?", userID).Find(&progress).Error
 
-	totalDuration := 0
-	for _, session := range scoreSessions {
-		totalDuration += session.Duration
-	}
+    totalDuration := 0
+    for _, session := range scoreSessions {
+        totalDuration += session.Duration
+    }
 
-	totalSoal := 0
-	for _, p := range progress {
-		totalSoal += p.TotalQuestions
-	}
+    totalSoal := 0
+    for _, p := range progress {
+        totalSoal += p.TotalQuestions
+    }
 
-	profile := &ProfileResponse{
-		Username:   user.Username,
-		Name:       user.Profile.Name,
-		Description: user.Profile.Description,
-		PhotoURL:   user.Profile.PhotoURL,
-		JoinedAt:   user.CreatedAt,
-	}
+    base64Img := ""
+    if len(user.Profile.PhotoBlob) > 0 {
+        base64Img = "data:image/png;base64," + base64.StdEncoding.EncodeToString(user.Profile.PhotoBlob)
+    }
 
-	profile.Stats.LamaBelajar = totalDuration
-	profile.Stats.SoalDikerjakan = totalSoal
-	profile.Stats.Penyelesaian = len(scoreSessions)
-	profile.Stats.Streak = streak.CurrentStreak
+    profile := &ProfileResponse{
+        Username:    user.Username,
+        Name:        user.Profile.Name,
+        Description: user.Profile.Description,
+        PhotoBase64: base64Img,
+        JoinedAt:    user.CreatedAt,
+    }
 
-	return profile, nil
+    profile.Stats.LamaBelajar = totalDuration
+    profile.Stats.SoalDikerjakan = totalSoal
+    profile.Stats.Penyelesaian = len(scoreSessions)
+    profile.Stats.Streak = streak.CurrentStreak
+
+    return profile, nil
 }
-type UpdateProfileInput struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	PhotoURL    string `json:"photo_url"`
-}
 
-func UpdateUserProfile(userID uuid.UUID, input UpdateProfileInput) error {
-	var profile models.UserProfile
 
-	if err := initializers.DB.Where("user_id = ?", userID).First(&profile).Error; err != nil {
-		return err
-	}
+func UpdateUserProfile(userID uuid.UUID, name, description string, photoBlob []byte) error {
+    var profile models.UserProfile
 
-	profile.Name = input.Name
-	profile.Description = input.Description
-	profile.PhotoURL = input.PhotoURL
+    if err := initializers.DB.Where("user_id = ?", userID).First(&profile).Error; err != nil {
+        return err
+    }
 
-	return initializers.DB.Save(&profile).Error
+    profile.Name = name
+    profile.Description = description
+    if len(photoBlob) > 0 {
+        profile.PhotoBlob = photoBlob
+    }
+
+    return initializers.DB.Save(&profile).Error
 }

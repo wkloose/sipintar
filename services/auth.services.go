@@ -11,6 +11,7 @@ import (
     "github.com/wkloose/tempproject.git/initializers"
     "github.com/wkloose/tempproject.git/models"
 	"gorm.io/gorm"
+    
 )
 
 func RegisterUser(username, email, password string) error {
@@ -49,7 +50,7 @@ func RegisterUser(username, email, password string) error {
         ID:       uuid.New(),
         UserID:   user.ID,
         Name:     username,         
-        PhotoURL: "",         
+        PhotoBlob: []byte{}, 
     }
      _ = initializers.DB.Create(&profile)
 
