@@ -13,8 +13,24 @@ import (
 	"gorm.io/gorm"
 	"strconv"
 	"os"
+	"github.com/go-gomail/gomail"
 )
+func sendResetEmail(to, token string) error {
+    m := gomail.NewMessage()
+    m.SetHeader("From", "noreply@sipintar.com")
+    m.SetHeader("To", to)
+    m.SetHeader("Subject", "Reset Password SiPintar")
+    m.SetBody("text/plain", fmt.Sprintf(
+        "Klik link berikut untuk reset password Anda:\n\nhttp://localhost:3000/reset-password?token=%s", token,
+    ))
 
+    d := gomail.NewDialer(
+        "smtp.gmail.com", 587,
+        os.Getenv("SMTP_USER"), os.Getenv("SMTP_PASS"),
+    )
+
+    return d.DialAndSend(m)
+}
 func generateToken(n int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	token := make([]byte, n)
@@ -25,41 +41,44 @@ func generateToken(n int) string {
 }
 
 func RequestPasswordReset(email string) (string, error) {
-	var user models.User
-	err := initializers.DB.Where("email = ?", email).First(&user).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", fmt.Errorf("email tidak terdaftar")
-		}
-		return "", err 
-	}
+    var user models.User
 
-	expMinStr := os.Getenv("RESET_PASSWORD_EXPIRATION_MINUTES")
-	expMin, err := strconv.Atoi(expMinStr)
-	if err != nil || expMin <= 0 {
-		expMin = 15 
-	}
+    err := initializers.DB.Where("email = ?", email).First(&user).Error
+    if err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            return "", fmt.Errorf("email tidak terdaftar")
+        }
+        return "", err
+    }
 
-	token := generateToken(32)
-	expiration := time.Now().Add(time.Duration(expMin) * time.Minute)
+    expMinStr := os.Getenv("RESET_PASSWORD_EXPIRATION_MINUTES")
+    expMin, err := strconv.Atoi(expMinStr)
+    if err != nil || expMin <= 0 {
+        expMin = 15
+    }
 
-	resetToken := models.PasswordResetToken{
-		ID:        uuid.New(),
-		Email:     email,
-		Token:     token,
-		ExpiresAt: expiration,
-	}
+    token := generateToken(32)
+    expiration := time.Now().Add(time.Duration(expMin) * time.Minute)
 
-	err = initializers.DB.Create(&resetToken).Error
-	if err != nil {
-		fmt.Println("DEBUG Gagal insert resetToken:", err)
-		return "", fmt.Errorf("Gagal membuat token reset")
-	}
+    resetToken := models.PasswordResetToken{
+        ID:        uuid.New(),
+        Email:     email,
+        Token:     token,
+        ExpiresAt: expiration,
+    }
 
-	fmt.Printf("Reset link: http://localhost:3000/reset-password?token=%s\n", token)
+    err = initializers.DB.Create(&resetToken).Error
+    if err != nil {
+        return "", fmt.Errorf("Gagal membuat token reset")
+    }
 
-	return token, nil
+    if err := sendResetEmail(email, token); err != nil {
+        return "", fmt.Errorf("Gagal mengirim email reset: %v", err)
+    }
+
+    return token, nil
 }
+
 
 func ResetPassword(token string, newPassword string) error {
 	var resetToken models.PasswordResetToken
