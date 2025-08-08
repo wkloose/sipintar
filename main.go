@@ -12,10 +12,10 @@ func init() {
 	initializers.LoadEnv()
 	initializers.ConnectToDB()
 	initializers.SyncDatabase()
+	seed.SeedLinear()
+	seed.SeedLimit()	
 	seed.SeedTurunan()
 	seed.SeedIntegral()
-	seed.SeedLimit()
-	seed.SeedLinear()
 }
 
 func main() {
